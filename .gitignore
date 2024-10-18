@@ -1,0 +1,30 @@
+# Ignore database files
+*.sqlite3
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore Django migrations
+**/migrations/
+
+# Ignore environment files (if using virtualenv or venv)
+.env
+.vscode/
+*.env
+env/
+venv/
+
+# Ignore Django secret key file if you have one
+secret_key.txt
+
+# Ignore static files if they are generated
+**/static/
+
+# Ignore IDE files
+.idea/
+.vscode/
+
+# Ignore system files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Newspaper</title>
+</head>
+<body>
+    <h1>Wall Street Journal - {{ purchase_date }}</h1>
+    <img src="{{ media_url }}{{ newspaper_image }}" alt="Newspaper" style="width:100%; height:auto;">
+    <form action="{% url 'stock_selection' %}" method="get">
+        <input type="hidden" name="purchase_date" value="{{ purchase_date }}">
+        <button type="submit">Select Stocks</button>
+    </form>
+</body>
+</html>

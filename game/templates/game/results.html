@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Investment Results</title>
+</head>
+<body>
+    <h1>Investment Results</h1>
+    {% if stock_symbol %}
+        <p><strong>Stock Symbol:</strong> {{ stock_symbol }}</p>
+        <p><strong>Purchase Date:</strong> {{ purchase_date }}</p>
+        <p><strong>Quantity:</strong> {{ quantity }}</p>
+        <p><strong>Purchase Price:</strong> ${{ purchase_price }}</p>
+        {% if future_price %}
+            <p><strong>Price After Two Weeks:</strong> ${{ future_price }}</p>
+            <p><strong>Profit/Loss:</strong> ${{ profit_loss }}</p>
+        {% else %}
+            <p>Data not available for two weeks later.</p>
+        {% endif %}
+    {% else %}
+        <p>No selections made.</p>
+    {% endif %}
+    <a href="{% url 'newspaper' %}">Try Again</a>
+</body>
+</html>
