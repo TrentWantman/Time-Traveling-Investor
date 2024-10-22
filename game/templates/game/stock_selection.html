@@ -1,22 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Select Stocks</title>
-</head>
-<body>
-    <h1>Select Stocks on {{ purchase_date }}</h1>
-    {% if error %}
-        <p style="color:red;">{{ error }}</p>
-    {% endif %}
-    <form method="post">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div id="stock-form">
+    <h2>Bank Balance: $<span id="balance">{{ balance }}</span></h2>
+    <form method="POST">
         {% csrf_token %}
-        <label for="stock_symbol">Stock Symbol:</label>
-        <input type="text" name="stock_symbol" required><br>
-        <label for="quantity">Quantity:</label>
-        <input type="number" name="quantity" min="1" required><br>
-        <input type="hidden" name="purchase_date" value="{{ purchase_date }}">
+        <div id="stock-inputs">
+            <!-- The first stock input -->
+            <div class="stock-entry">
+                <label for="stock-symbol">Stock Symbol:</label>
+                <input type="text" class="stock-symbol-input" name="stock_symbol" />
+
+                <label for="quantity">Quantity:</label>
+                <input type="number" class="quantity-input" name="quantity" min="1" />
+            </div>
+        </div>
+        <button type="button" id="add-stock-btn">Add Another Stock</button>
         <button type="submit">Submit</button>
     </form>
-</body>
-</html>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const balanceElement = document.getElementById('balance');
+    const stockInputsContainer = document.getElementById('stock-inputs');
+    const addStockBtn = document.getElementById('add-stock-btn');
+
+    let initialBalance = parseFloat(balanceElement.textContent);
+    const stockPrices = {};
+
+    // Function to add a new stock entry
+    function addStockEntry() {
+        const newEntry = document.createElement('div');
+        newEntry.classList.add('stock-entry');
+
+        newEntry.innerHTML = `
+            <label for="stock-symbol">Stock Symbol:</label>
+            <input type="text" class="stock-symbol-input" name="stock_symbol" />
+
+            <label for="quantity">Quantity:</label>
+            <input type="number" class="quantity-input" name="quantity" min="1" />
+        `;
+
+        stockInputsContainer.appendChild(newEntry);
+        attachStockSymbolListener(newEntry);
+    }
+
+    // Function to attach event listener for stock symbol input
+    function attachStockSymbolListener(entry) {
+        const stockSymbolInput = entry.querySelector('.stock-symbol-input');
+        const quantityContainer = entry.querySelector('.quantity-container');
+
+        stockSymbolInput.addEventListener('blur', async function () {
+            const stockSymbol = stockSymbolInput.value.trim().toUpperCase();
+            if (stockSymbol) {
+                try {
+                    const response = await fetch(`/get_price/?stock_symbol=${stockSymbol}&purchase_date=${getPurchaseDate()}`);
+                    const data = await response.json();
+                    if (data.price) {
+                        stockPrices[stockSymbol] = parseFloat(data.price);
+                        quantityContainer.style.display = 'block';
+                        attachQuantityListener(entry, stockSymbol);
+                    } else {
+                        alert('Stock not found or no data available for the date.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching price:', error);
+                    alert('There was an error fetching the stock price.');
+                }
+            }
+        });
+    }
+
+    // Function to attach event listener for quantity input
+    function attachQuantityListener(entry, stockSymbol) {
+        const quantityInput = entry.querySelector('.quantity-input');
+
+        quantityInput.addEventListener('input', function () {
+            updateBalance(stockSymbol, quantityInput);
+        });
+    }
+
+    // Function to get the purchase date from the URL
+    function getPurchaseDate() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('purchase_date') || '';
+    }
+
+    // Function to update the balance dynamically based on quantity
+    function updateBalance(stockSymbol, quantityInput) {
+        const quantity = parseInt(quantityInput.value) || 0;
+        const stockPrice = stockPrices[stockSymbol];
+        alert('Updating Balance.');
+
+        if (stockPrice && quantity >= 0) {
+            const totalCost = stockPrice * quantity;
+            const newBalance = initialBalance - totalCost;
+            balanceElement.textContent = newBalance.toFixed(2);
+        }
+    }
+
+    // Attach initial stock symbol listeners
+    document.querySelectorAll('.stock-entry').forEach(attachStockSymbolListener);
+
+    // Add new stock entry on button click
+    addStockBtn.addEventListener('click', addStockEntry);
+});
+</script>
